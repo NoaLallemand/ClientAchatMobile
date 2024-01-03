@@ -6,9 +6,14 @@ import android.util.Log;
 
 import androidx.loader.content.AsyncTaskLoader;
 
+import com.nl.clientachatmobile.Models.Data.Article;
+import com.nl.clientachatmobile.Models.Data.CurrentArticleManager;
+import com.nl.clientachatmobile.Models.Exceptions.DataBaseException;
 import com.nl.clientachatmobile.Models.Protocols.Protocol;
+import com.nl.clientachatmobile.Models.Requests.ConsultRequest;
 import com.nl.clientachatmobile.Models.Requests.LoginRequest;
 import com.nl.clientachatmobile.Models.Requests.Request;
+import com.nl.clientachatmobile.Models.Responses.ConsultResponse;
 import com.nl.clientachatmobile.Models.Responses.LoginResponse;
 import com.nl.clientachatmobile.Models.Responses.Response;
 
@@ -19,13 +24,15 @@ import java.nio.channels.AsynchronousByteChannel;
 public class Ovesp implements Protocol {
 
     private DataTransfer dataTransfer;
-
     private String loginUser;
-
     private static Ovesp instance;
+    private CurrentArticleManager currentArticleManager;
+
 
     private Ovesp() {
         loginUser = "";
+        currentArticleManager = new CurrentArticleManager();
+        dataTransfer = null;
     }
 
     public static Ovesp getInstance() {
@@ -34,6 +41,8 @@ public class Ovesp implements Protocol {
         }
         return instance;
     }
+
+    public CurrentArticleManager getCurrentArticleManager() { return currentArticleManager; }
 
     @SuppressLint("StaticFieldLeak")
     public boolean init(InputStream inputStream) {
@@ -59,6 +68,9 @@ public class Ovesp implements Protocol {
         if(request instanceof LoginRequest) {
             return handleLoginRequest((LoginRequest) request);
         }
+        if(request instanceof ConsultRequest) {
+            return handleConsultRequest((ConsultRequest) request);
+        }
 
         return null;
     }
@@ -82,6 +94,37 @@ public class Ovesp implements Protocol {
         else {
             String errorMsg = responseElements[2];
             throw new Exception(errorMsg);
+        }
+    }
+
+    private ConsultResponse handleConsultRequest(ConsultRequest consultRequest) throws Exception {
+        String request = "CONSULT#" + consultRequest.getArticleId();
+        String response = dataTransfer.exchange(request);
+
+        String[] responseElements = response.split("#");
+        if(responseElements[1].equals("KO")) {
+            int errCode = Integer.parseInt(responseElements[2]);
+            String msgError;
+            if(errCode == DataBaseException.QUERY_ERROR) {
+                msgError = "Une erreur est survenue lors de l'envoi de la requete...Veuillez reessayer!";
+            }
+            else if(errCode == DataBaseException.EMPTY_RESULT_SET) {
+                msgError = "Aucun article correspondant a votre demande n'a ete trouve!";
+            }
+            else {
+                msgError = "Erreur inconnue...";
+            }
+            throw new Exception(msgError);
+        }
+        else {
+            int id = Integer.parseInt(responseElements[2]);
+            String intitule = responseElements[3];
+            int stock = Integer.parseInt(responseElements[4]);
+            String image = responseElements[5];
+            float prix = Float.parseFloat(responseElements[6]);
+
+            Article a = new Article(id, intitule, stock, image, prix);
+            return new ConsultResponse(a);
         }
     }
 }

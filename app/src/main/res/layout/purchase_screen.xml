@@ -6,7 +6,7 @@
     android:layout_height="match_parent">
 
     <ImageView
-        android:id="@+id/imageView2"
+        android:id="@+id/imageViewArticle"
         android:layout_width="150dp"
         android:layout_height="150dp"
         android:src="@drawable/ail"
@@ -16,43 +16,57 @@
         android:layout_marginTop="50dp"/>
 
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/textViewArticleName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="TextView"
-        app:layout_constraintStart_toEndOf="@id/imageView2"
+        android:text="Nom Article"
+        android:textSize="20sp"
+        app:layout_constraintStart_toEndOf="@id/imageViewArticle"
         app:layout_constraintTop_toTopOf="parent"
         android:layout_marginTop="50dp"
         android:layout_marginStart="40dp"/>
 
     <TextView
-        android:id="@+id/textView2"
+        android:id="@+id/textViewArticlePrice"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="TextView"
-        app:layout_constraintStart_toEndOf="@id/imageView2"
-        app:layout_constraintTop_toBottomOf="@id/textView"
-        android:layout_marginTop="12dp"
+        android:text="Prix"
+        android:textSize="20sp"
+        app:layout_constraintStart_toEndOf="@id/imageViewArticle"
+        app:layout_constraintTop_toBottomOf="@id/textViewArticleName"
+        android:layout_marginTop="8dp"
         android:layout_marginStart="40dp" />
 
     <TextView
-        android:id="@+id/textView3"
+        android:id="@+id/textViewArticleStock"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="TextView"
-        app:layout_constraintStart_toEndOf="@id/imageView2"
-        app:layout_constraintTop_toBottomOf="@id/textView2"
-        android:layout_marginTop="12dp"
+        android:text="Stock"
+        android:textSize="20sp"
+        app:layout_constraintStart_toEndOf="@id/imageViewArticle"
+        app:layout_constraintTop_toBottomOf="@id/textViewArticlePrice"
+        android:layout_marginTop="8dp"
         android:layout_marginStart="40dp"/>
 
-    <Spinner
-        android:id="@+id/spinArticleQty"
+    <TextView
+        android:id="@+id/textViewArticleQty"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintStart_toEndOf="@id/imageView2"
-        app:layout_constraintTop_toBottomOf="@id/textView3"
-        android:layout_marginTop="12dp"
-        android:layout_marginStart="40dp"/>
+        android:text="Quantité"
+        android:textSize="20sp"
+        app:layout_constraintStart_toEndOf="@id/imageViewArticle"
+        app:layout_constraintBottom_toBottomOf="@id/editTextArticleQty"
+        android:layout_marginStart="40dp"
+        android:layout_marginBottom="5dp"/>
+
+    <EditText
+        android:id="@+id/editTextArticleQty"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        app:layout_constraintStart_toEndOf="@id/textViewArticleQty"
+        app:layout_constraintTop_toBottomOf="@id/textViewArticleStock"
+        android:layout_marginTop="8dp"
+        android:layout_marginStart="10dp"/>
 
 
     <Button
@@ -61,7 +75,7 @@
         android:layout_height="wrap_content"
         android:text="Précédent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/imageView2"
+        app:layout_constraintTop_toBottomOf="@id/imageViewArticle"
         android:layout_marginTop="20dp"
         android:layout_marginStart="25dp" />
 
@@ -71,7 +85,7 @@
         android:layout_height="wrap_content"
         android:text="Suivant"
         app:layout_constraintStart_toEndOf="@id/btnPreviousArticle"
-        app:layout_constraintTop_toBottomOf="@id/imageView2"
+        app:layout_constraintTop_toBottomOf="@id/imageViewArticle"
         android:layout_marginTop="20dp"
         android:layout_marginStart="10dp"/>
 
@@ -81,7 +95,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Acheter"
-        app:layout_constraintTop_toBottomOf="@id/imageView2"
+        app:layout_constraintTop_toBottomOf="@id/imageViewArticle"
         android:layout_marginTop="20dp"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginEnd="25dp" />

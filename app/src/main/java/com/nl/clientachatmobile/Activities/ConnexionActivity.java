@@ -60,12 +60,9 @@ public class ConnexionActivity extends Activity implements View.OnClickListener 
 
                     @Override
                     public void onLoginFailed(String errorMsg) {
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Log.e("ConnexionActivity DEBUG", errorMsg);
-                                Toast.makeText(ConnexionActivity.this, errorMsg, Toast.LENGTH_SHORT).show();
-                            }
+                        runOnUiThread(() -> {
+                            Log.e("ConnexionActivity DEBUG", errorMsg);
+                            Toast.makeText(ConnexionActivity.this, errorMsg, Toast.LENGTH_LONG).show();
                         });
                     }
                 }
