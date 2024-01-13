@@ -104,30 +104,12 @@
     <ListView
         android:id="@+id/listViewArticles"
         android:layout_width="match_parent"
-        android:layout_height="300dp"
+        android:layout_height="250dp"
         app:layout_constraintTop_toBottomOf="@id/btnPreviousArticle"
         android:layout_marginHorizontal="25dp"
         android:layout_marginTop="25dp"/>
 
-    <Button
-        android:id="@+id/btnDeleteArticle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Supprimer Article"
-        app:layout_constraintTop_toBottomOf="@id/listViewArticles"
-        app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginStart="25dp"
-        android:layout_marginTop="20dp"/>
 
-    <Button
-        android:id="@+id/btnClearCart"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Vider Panier"
-        app:layout_constraintTop_toBottomOf="@id/listViewArticles"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginEnd="25dp"
-        android:layout_marginTop="20dp"/>
 
     <TextView
         android:id="@+id/textViewTotalToPay"
@@ -135,7 +117,7 @@
         android:layout_height="wrap_content"
         android:text="Total a payer"
         android:padding="10dp"
-        app:layout_constraintTop_toBottomOf="@id/btnDeleteArticle"
+        app:layout_constraintTop_toBottomOf="@id/listViewArticles"
         app:layout_constraintStart_toStartOf="parent"
         android:layout_marginTop="15dp"
         android:layout_marginStart="25dp" />
@@ -151,12 +133,32 @@
         android:layout_marginStart="10dp"/>
 
     <Button
-        android:id="@+id/btnConfirmPurchase"
+        android:id="@+id/btnDeleteArticle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Confirmer Achat"
-        app:layout_constraintTop_toTopOf="@id/textViewTotalToPay"
+        android:text="Supprimer Article"
+        app:layout_constraintTop_toBottomOf="@id/textViewTotalToPay"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginStart="25dp"
+        android:layout_marginTop="20dp"/>
+
+    <Button
+        android:id="@+id/btnClearCart"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Vider Panier"
+        app:layout_constraintTop_toBottomOf="@id/textViewTotalToPay"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginEnd="25dp" />
+        android:layout_marginEnd="25dp"
+        android:layout_marginTop="20dp"/>
+
+    <Button
+        android:id="@+id/btnConfirmPurchase"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Confirmer Achat"
+        app:layout_constraintTop_toBottomOf="@id/btnDeleteArticle"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginHorizontal="25dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

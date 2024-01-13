@@ -7,16 +7,20 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
+import com.nl.clientachatmobile.Models.Adapters.ArticleAdapter;
 import com.nl.clientachatmobile.Models.Data.Article;
 import com.nl.clientachatmobile.Models.Protocols.OVESP.Ovesp;
+import com.nl.clientachatmobile.Network.BuyArticleManager;
 import com.nl.clientachatmobile.Network.ConsultManager;
 import com.nl.clientachatmobile.R;
 
+import java.util.List;
 import java.util.Locale;
 
 public class PurchaseActivity extends Activity implements View.OnClickListener {
@@ -27,6 +31,7 @@ public class PurchaseActivity extends Activity implements View.OnClickListener {
     private TextView txtViewArticleName;
     private TextView txtViewArticlePrice;
     private TextView txtViewArticleStock;
+    private TextView txtViewTotalToPay;
     private EditText editTextArticleQty;
 
     private Button btnNextArticle;
@@ -35,6 +40,8 @@ public class PurchaseActivity extends Activity implements View.OnClickListener {
     private Button btnDeleteArticle;
     private Button btnClearCart;
     private Button btnConfirmPurchase;
+
+    private ListView listViewArticles;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -47,6 +54,7 @@ public class PurchaseActivity extends Activity implements View.OnClickListener {
         txtViewArticleName = findViewById(R.id.textViewArticleName);
         txtViewArticlePrice = findViewById(R.id.textViewArticlePrice);
         txtViewArticleStock = findViewById(R.id.textViewArticleStock);
+        txtViewTotalToPay = findViewById(R.id.textViewDisplayTotalToPay);
         editTextArticleQty = findViewById(R.id.editTextArticleQty);
 
         btnNextArticle = findViewById(R.id.btnNextArticle);
@@ -55,6 +63,10 @@ public class PurchaseActivity extends Activity implements View.OnClickListener {
         btnDeleteArticle = findViewById(R.id.btnDeleteArticle);
         btnClearCart = findViewById(R.id.btnClearCart);
         btnConfirmPurchase = findViewById(R.id.btnConfirmPurchase);
+
+        listViewArticles = findViewById(R.id.listViewArticles);
+        ArticleAdapter adapter = new ArticleAdapter(this, Ovesp.getInstance().getShoppingCart().getArticles());
+        listViewArticles.setAdapter(adapter);
 
         btnNextArticle.setOnClickListener(this);
         btnPreviousArticle.setOnClickListener(this);
@@ -75,7 +87,13 @@ public class PurchaseActivity extends Activity implements View.OnClickListener {
             consultArticle(false);
         }
         else if(v == btnBuyArticle) {
-
+            int quantity = Integer.parseInt(editTextArticleQty.getText().toString());
+            if(quantity > 0) {
+                buyArticle(quantity);
+            }
+            else {
+                Toast.makeText(this, "Veuillez choisir au moins 1 article!", Toast.LENGTH_LONG).show();
+            }
         }
         else if(v == btnDeleteArticle) {
 
@@ -105,6 +123,27 @@ public class PurchaseActivity extends Activity implements View.OnClickListener {
         });
     }
 
+    private void buyArticle(int quantity) {
+        BuyArticleManager buyArticleManager = new BuyArticleManager();
+        buyArticleManager.performBuyAsync(quantity, new BuyArticleManager.OnBuyCompleteListener() {
+            @Override
+            public void onBuyComplete() {
+                updateCurrentArticleOnUI();
+                updateTotalToPay();
+                ArticleAdapter adapter = (ArticleAdapter) listViewArticles.getAdapter();
+                adapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onBuyFailed(String errorMsg) {
+                runOnUiThread(() -> {
+                    Log.e("PurchaseActivity DEBUG", errorMsg);
+                    Toast.makeText(PurchaseActivity.this, errorMsg, Toast.LENGTH_LONG).show();
+                });
+            }
+        });
+    }
+
     private void updateCurrentArticleOnUI() {
         Article currentArticle = Ovesp.getInstance().getCurrentArticleManager().getCurrentArticle();
 
@@ -117,5 +156,15 @@ public class PurchaseActivity extends Activity implements View.OnClickListener {
         String imageNameInResources = image.substring(0, imageLength - 4);
         int resId = getResources().getIdentifier(imageNameInResources, "drawable", getPackageName());
         imageViewArticle.setImageResource(resId);
+    }
+
+    public void updateTotalToPay() {
+        List<Article> shoppingCart = Ovesp.getInstance().getShoppingCart().getArticles();
+
+        float totalAmount = 0;
+        for(Article a : shoppingCart) {
+            totalAmount += a.getPrix() * a.getQuantite();
+        }
+        txtViewTotalToPay.setText(String.format(Locale.getDefault(), "%.2f €", totalAmount));
     }
 }
