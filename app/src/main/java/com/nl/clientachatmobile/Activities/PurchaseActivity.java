@@ -17,6 +17,7 @@ import com.nl.clientachatmobile.Models.Adapters.ArticleAdapter;
 import com.nl.clientachatmobile.Models.Data.Article;
 import com.nl.clientachatmobile.Models.Protocols.OVESP.Ovesp;
 import com.nl.clientachatmobile.Network.BuyArticleManager;
+import com.nl.clientachatmobile.Network.CancelManager;
 import com.nl.clientachatmobile.Network.ConsultManager;
 import com.nl.clientachatmobile.R;
 
@@ -67,6 +68,7 @@ public class PurchaseActivity extends Activity implements View.OnClickListener {
         listViewArticles = findViewById(R.id.listViewArticles);
         ArticleAdapter adapter = new ArticleAdapter(this, Ovesp.getInstance().getShoppingCart().getArticles());
         listViewArticles.setAdapter(adapter);
+        listViewArticles.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 
         btnNextArticle.setOnClickListener(this);
         btnPreviousArticle.setOnClickListener(this);
@@ -96,7 +98,7 @@ public class PurchaseActivity extends Activity implements View.OnClickListener {
             }
         }
         else if(v == btnDeleteArticle) {
-
+            deleteArticle();
         }
         else if(v == btnClearCart) {
 
@@ -142,6 +144,34 @@ public class PurchaseActivity extends Activity implements View.OnClickListener {
                 });
             }
         });
+    }
+
+    private void deleteArticle() {
+        int indice = listViewArticles.getCheckedItemPosition();
+        if(indice != -1) {
+            Article selectedItem = (Article) listViewArticles.getAdapter().getItem(indice);
+            int articleId = selectedItem.getId();
+            int quantity = selectedItem.getQuantite();
+
+            CancelManager cancelManager = new CancelManager();
+            cancelManager.performCancelAsync(articleId, quantity, indice, new CancelManager.OnCancelCompleteListener() {
+                @Override
+                public void onCancelComplete() {
+                    Ovesp.getInstance().getShoppingCart().getArticles().remove(indice);
+                    ArticleAdapter adapter = (ArticleAdapter) listViewArticles.getAdapter();
+                    adapter.notifyDataSetChanged();
+                    updateTotalToPay();
+                }
+
+                @Override
+                public void onConcelFailed(String errorMsg) {
+                    runOnUiThread(() -> {
+                        Log.e("PurchaseActivity DEBUG", errorMsg);
+                        Toast.makeText(PurchaseActivity.this, errorMsg, Toast.LENGTH_LONG).show();
+                    });
+                }
+            });
+        }
     }
 
     private void updateCurrentArticleOnUI() {

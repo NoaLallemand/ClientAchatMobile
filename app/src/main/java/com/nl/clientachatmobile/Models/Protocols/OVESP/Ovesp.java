@@ -13,10 +13,12 @@ import com.nl.clientachatmobile.Models.Exceptions.AchatArticleException;
 import com.nl.clientachatmobile.Models.Exceptions.DataBaseException;
 import com.nl.clientachatmobile.Models.Protocols.Protocol;
 import com.nl.clientachatmobile.Models.Requests.BuyRequest;
+import com.nl.clientachatmobile.Models.Requests.CancelRequest;
 import com.nl.clientachatmobile.Models.Requests.ConsultRequest;
 import com.nl.clientachatmobile.Models.Requests.LoginRequest;
 import com.nl.clientachatmobile.Models.Requests.Request;
 import com.nl.clientachatmobile.Models.Responses.BuyResponse;
+import com.nl.clientachatmobile.Models.Responses.CancelResponse;
 import com.nl.clientachatmobile.Models.Responses.ConsultResponse;
 import com.nl.clientachatmobile.Models.Responses.LoginResponse;
 import com.nl.clientachatmobile.Models.Responses.Response;
@@ -83,6 +85,9 @@ public class Ovesp implements Protocol {
         if(request instanceof BuyRequest) {
             return handleBuyRequest((BuyRequest) request);
         }
+        if(request instanceof CancelRequest) {
+            return handleCancelRequest((CancelRequest) request);
+        }
 
         return null;
     }
@@ -97,7 +102,7 @@ public class Ovesp implements Protocol {
         }
 
         String response = dataTransfer.exchange(request);
-        Log.i("Ovesp Info", "Response: " + response);
+        Log.i("Ovesp DEBUG", "Response: " + response);
 
         String[] responseElements = response.split("#");
         if(responseElements[1].equals("ok")) {
@@ -112,6 +117,7 @@ public class Ovesp implements Protocol {
     private ConsultResponse handleConsultRequest(ConsultRequest consultRequest) throws Exception {
         String request = "CONSULT#" + consultRequest.getArticleId();
         String response = dataTransfer.exchange(request);
+        Log.i("Ovesp DEBUG", "Reponse reçue: " + response);
 
         String[] responseElements = response.split("#");
         if(responseElements[1].equals("KO")) {
@@ -129,6 +135,10 @@ public class Ovesp implements Protocol {
             throw new Exception(msgError);
         }
         else {
+            for(int i=0; i<responseElements.length; i++) {
+                Log.e("TEST", "Element [" + i + "] = " + responseElements[i]);
+            }
+
             int id = Integer.parseInt(responseElements[2]);
             String intitule = responseElements[3];
             int stock = Integer.parseInt(responseElements[4]);
@@ -143,6 +153,7 @@ public class Ovesp implements Protocol {
     private BuyResponse handleBuyRequest(BuyRequest buyRequest) throws Exception {
         String request = "ACHAT#" + buyRequest.getIdArticle() + "#" + buyRequest.getQuantity();
         String response = dataTransfer.exchange(request);
+        Log.i("Ovesp DEBUG", "Reponse reçue: " + response);
 
         String[] responseElements = response.split("#");
         if(responseElements[1].equals("KO")) {
@@ -176,5 +187,25 @@ public class Ovesp implements Protocol {
             Article a = new Article(id, intitule, stock, image, prix);
             return new BuyResponse(a);
         }
+    }
+
+    private CancelResponse handleCancelRequest(CancelRequest cancelRequest) throws Exception {
+        String request = "CANCEL#" + cancelRequest.getArticleId() + "#" + cancelRequest.getQuantity() + "#" + cancelRequest.getArticleIndice();
+        try {
+            String response = dataTransfer.exchange(request);
+            Log.i("Ovesp DEBUG", "Reponse reçue: " + response);
+
+            String[] responseElements = response.split("#");
+            if(responseElements[1].equals("OK")) {
+                return new CancelResponse(true);
+            }
+            else {
+                return new CancelResponse(false);
+            }
+        }
+        catch(IOException e) {
+            throw new Exception("Une erreur est survenue lors de l'envoi de la requête...");
+        }
+
     }
 }
