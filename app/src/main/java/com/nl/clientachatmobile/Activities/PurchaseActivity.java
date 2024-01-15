@@ -158,13 +158,16 @@ public class PurchaseActivity extends Activity implements View.OnClickListener {
                 @Override
                 public void onCancelComplete() {
                     Ovesp.getInstance().getShoppingCart().getArticles().remove(indice);
-                    ArticleAdapter adapter = (ArticleAdapter) listViewArticles.getAdapter();
-                    adapter.notifyDataSetChanged();
-                    updateTotalToPay();
+                    runOnUiThread(() -> {
+                        ArticleAdapter adapter = (ArticleAdapter) listViewArticles.getAdapter();
+                        adapter.notifyDataSetChanged();
+                        updateTotalToPay();
+                    });
                 }
 
                 @Override
-                public void onConcelFailed(String errorMsg) {
+                public void onCancelFailed(String errorMsg) {
+                    Log.e("ERROR", "Erreur survenue lors du cancel...");
                     runOnUiThread(() -> {
                         Log.e("PurchaseActivity DEBUG", errorMsg);
                         Toast.makeText(PurchaseActivity.this, errorMsg, Toast.LENGTH_LONG).show();

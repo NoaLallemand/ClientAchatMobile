@@ -206,6 +206,5 @@ public class Ovesp implements Protocol {
         catch(IOException e) {
             throw new Exception("Une erreur est survenue lors de l'envoi de la requête...");
         }
-
     }
 }

@@ -5,7 +5,6 @@ import android.util.Log;
 
 import com.nl.clientachatmobile.Models.Protocols.OVESP.Ovesp;
 import com.nl.clientachatmobile.Models.Requests.CancelRequest;
-import com.nl.clientachatmobile.Models.Responses.CancelResponse;
 
 public class CancelManager {
 
@@ -35,7 +34,7 @@ public class CancelManager {
             }
             catch(Exception e) {
                 Log.e("CancelManager DEBUG", e.getMessage());
-                listener.onConcelFailed(e.getMessage());
+                listener.onCancelFailed(e.getMessage());
             }
             return null;
         }
@@ -44,6 +43,6 @@ public class CancelManager {
     public interface OnCancelCompleteListener {
         void onCancelComplete();
 
-        void onConcelFailed(String errorMsg);
+        void onCancelFailed(String errorMsg);
     }
 }
