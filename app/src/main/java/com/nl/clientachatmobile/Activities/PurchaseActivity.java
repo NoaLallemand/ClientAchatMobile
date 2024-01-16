@@ -1,8 +1,13 @@
 package com.nl.clientachatmobile.Activities;
 
-import android.app.Activity;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -12,19 +17,25 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.nl.clientachatmobile.Models.Adapters.ArticleAdapter;
 import com.nl.clientachatmobile.Models.Data.Article;
+import com.nl.clientachatmobile.Models.Data.LanguageSelector;
 import com.nl.clientachatmobile.Models.Protocols.OVESP.Ovesp;
 import com.nl.clientachatmobile.Network.BuyArticleManager;
+import com.nl.clientachatmobile.Network.CancelAllManager;
 import com.nl.clientachatmobile.Network.CancelManager;
+import com.nl.clientachatmobile.Network.ConfirmManager;
 import com.nl.clientachatmobile.Network.ConsultManager;
+import com.nl.clientachatmobile.Network.LogoutManager;
 import com.nl.clientachatmobile.R;
 
 import java.util.List;
 import java.util.Locale;
 
-public class PurchaseActivity extends Activity implements View.OnClickListener {
+public class PurchaseActivity extends AppCompatActivity implements View.OnClickListener {
 
     private ConsultManager consultManager;
 
@@ -81,6 +92,47 @@ public class PurchaseActivity extends Activity implements View.OnClickListener {
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.iconDeconnexion) {
+            confirmDisconnect();
+        }
+        else if (item.getItemId() == R.id.itemlanguageFr) {
+            LanguageSelector.selectLanguage(this, "fr");
+            recreate();
+        }
+        else if(item.getItemId() == R.id.itemlanguageEn) {
+            LanguageSelector.selectLanguage(this, "en");
+            recreate();
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(getResources().getString(R.string.msgConfirmDisconnect));
+
+        builder.setPositiveButton(getResources().getString(R.string.yes), (dialog, which) -> {
+            super.onBackPressed();
+            disconnect();
+        });
+
+        builder.setNegativeButton(getResources().getString(R.string.no), (dialog, which) -> {
+            dialog.dismiss();
+        });
+
+        builder.show();
+    }
+
+
+    @Override
     public void onClick(View v) {
         if(v == btnNextArticle) {
             consultArticle(true);
@@ -94,17 +146,17 @@ public class PurchaseActivity extends Activity implements View.OnClickListener {
                 buyArticle(quantity);
             }
             else {
-                Toast.makeText(this, "Veuillez choisir au moins 1 article!", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, getResources().getString(R.string.alertMinOneArticle), Toast.LENGTH_LONG).show();
             }
         }
         else if(v == btnDeleteArticle) {
             deleteArticle();
         }
         else if(v == btnClearCart) {
-
+            clearShoppingCart();
         }
         else if(v == btnConfirmPurchase) {
-
+            confirmPurchase();
         }
     }
 
@@ -119,7 +171,7 @@ public class PurchaseActivity extends Activity implements View.OnClickListener {
             public void onConsultFailed(String errorMsg) {
                 runOnUiThread(() -> {
                     Log.e("PurchaseActivity DEBUG", errorMsg);
-                    Toast.makeText(PurchaseActivity.this, errorMsg, Toast.LENGTH_LONG).show();
+                    displayToUser(errorMsg);
                 });
             }
         });
@@ -140,7 +192,7 @@ public class PurchaseActivity extends Activity implements View.OnClickListener {
             public void onBuyFailed(String errorMsg) {
                 runOnUiThread(() -> {
                     Log.e("PurchaseActivity DEBUG", errorMsg);
-                    Toast.makeText(PurchaseActivity.this, errorMsg, Toast.LENGTH_LONG).show();
+                    displayToUser(errorMsg);
                 });
             }
         });
@@ -167,14 +219,106 @@ public class PurchaseActivity extends Activity implements View.OnClickListener {
 
                 @Override
                 public void onCancelFailed(String errorMsg) {
-                    Log.e("ERROR", "Erreur survenue lors du cancel...");
                     runOnUiThread(() -> {
                         Log.e("PurchaseActivity DEBUG", errorMsg);
-                        Toast.makeText(PurchaseActivity.this, errorMsg, Toast.LENGTH_LONG).show();
+                        displayToUser(errorMsg);
                     });
                 }
             });
         }
+    }
+
+    private void clearShoppingCart() {
+        List<Article> articlesList = Ovesp.getInstance().getShoppingCart().getArticles();
+        if(!articlesList.isEmpty()) {
+            CancelAllManager cancelAllManager = new CancelAllManager();
+            cancelAllManager.performCancelAllAsync(new CancelAllManager.OnCancelAllCompleteListener() {
+                @Override
+                public void onCancelAllComplete() {
+                    runOnUiThread(() -> {
+                        ArticleAdapter adapter = (ArticleAdapter) listViewArticles.getAdapter();
+                        adapter.notifyDataSetChanged();
+                        updateTotalToPay();
+                    });
+                }
+
+                @Override
+                public void onCancelAllFailed(String errorMsg) {
+                    runOnUiThread(() -> {
+                        Log.e("PurchaseActivity DEBUG", errorMsg);
+                        displayToUser(errorMsg);
+                    });
+                }
+            });
+        }
+    }
+
+    private void confirmPurchase() {
+        new ConfirmManager().performConfirmAsync(new ConfirmManager.OnConfirmCompleteListener() {
+            @Override
+            public void onConfirmComplete() {
+                runOnUiThread(() -> {
+                    ArticleAdapter adapter = (ArticleAdapter) listViewArticles.getAdapter();
+                    adapter.notifyDataSetChanged();
+                    updateTotalToPay();
+                    displayToUser(getResources().getString(R.string.alertConfirmPurchase));
+                });
+            }
+
+            @Override
+            public void onConfirmFailed(String errorMsg) {
+                runOnUiThread(() -> {
+                    displayToUser(errorMsg);
+                });
+            }
+        });
+    }
+
+    private void confirmDisconnect() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(getResources().getString(R.string.msgConfirmDisconnect));
+
+        builder.setPositiveButton(getResources().getString(R.string.yes), (dialog, which) -> {
+            dialog.dismiss();
+            disconnect();
+        });
+
+        builder.setNegativeButton(getResources().getString(R.string.no), (dialog, which) -> {
+            dialog.dismiss();
+        });
+
+        builder.show();
+    }
+
+    private void disconnect() {
+        clearShoppingCart();
+        LogoutManager logoutManager = new LogoutManager();
+        logoutManager.performLogoutAsync(new LogoutManager.OnLogoutCompleteListener() {
+            @Override
+            public void onLogoutComplete() {
+                Intent intent = new Intent(PurchaseActivity.this, ConnexionActivity.class);
+                startActivity(intent);
+            }
+
+            @Override
+            public void onLogoutFailed(String errorMsg) {
+                runOnUiThread(() -> {
+                    Log.e("PurchaseActivity DEBUG", errorMsg);
+                    Toast.makeText(PurchaseActivity.this, errorMsg, Toast.LENGTH_LONG).show();
+                });
+            }
+        });
+    }
+
+    private void displayToUser(String message) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(message)
+                .setPositiveButton("OK", (dialog, id) -> {
+                    dialog.dismiss();
+                });
+
+        builder.create().show();
+
     }
 
     private void updateCurrentArticleOnUI() {

@@ -42,4 +42,8 @@ public class ShoppingCart {
             return (articles.size() - 1);
         }
     }
+
+    public void clearCart() {
+        articles.clear();
+    }
 }

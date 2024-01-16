@@ -8,6 +8,10 @@ public class CurrentArticleManager {
     private Article currentArticle;
 
     public CurrentArticleManager() {
+        reinitialize();
+    }
+
+    public void reinitialize() {
         currentArticle = new Article();
         currentArticleId = MIN_ARTICLE_ID - 1;
     }

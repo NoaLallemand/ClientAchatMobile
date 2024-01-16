@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Le Maraicher en Ligne</string>
+
+    <string name="hintUsername">Nom d\'utilisateur</string>
+    <string name="hintPassword">Mot de passe</string>
+    <string name="newClient">Nouveau client ?</string>
+    <string name="connect">Se connecter</string>
+
+    <string name="articleName">Nom Article</string>
+    <string name="articlePrice">Prix</string>
+    <string name="articleStock">Stock</string>
+    <string name="articleQuantity">Quantité</string>
+    <string name="txtPreviousArticle">Précédent</string>
+    <string name="txtNextArticle">Suivant</string>
+    <string name="txtBuy">Acheter</string>
+    <string name="txtTotalToPay">Total a payer</string>
+    <string name="txtDeleteArticle">Supprimer Article</string>
+    <string name="txtClearCart">Vider Panier</string>
+    <string name="txtConfirmPurchase">Confirmer Achat</string>
+
+    <string name="itemDisconnectTxt">Déconnexion</string>
+    <string name="itemLanguageTxt">Langue</string>
+
+    <string name="french">Français</string>
+    <string name="english">Anglais</string>
+
+    <string name="msgConfirmDisconnect">Êtes-vous sûr de vouloir vous déconnecter ?</string>
+    <string name="yes">Oui</string>
+    <string name="no">Non</string>
+
+    <string name="alertMinOneArticle">Veuillez choisir au moins 1 article!</string>
+    <string name="alertConfirmPurchase">Votre commande a bien été confirmée et ajoutée au panier! Vous pouvez maintenant procéder au paiement de votre commande sur notre application de paiement</string>
+
+    <string name="dbQuerryError">Une erreur est survenue lors de l\'envoi de la requete…Veuillez reessayer!</string>
+    <string name="dbEmptyResultSetOnArticle">Aucun article correspondant a votre demande n\'a ete trouve!</string>
+    <string name="dbEmptyResultSetOnConfirm">Une erreur est survenue lors de la création de la facture pour votre compte utilisateur… Veuillez réessayer!</string>
+    <string name="unknownErrorMsg">Erreur inconnue…</string>
+
+</resources>

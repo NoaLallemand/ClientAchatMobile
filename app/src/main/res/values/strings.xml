@@ -1,3 +1,38 @@
 <resources>
-    <string name="app_name">ClientAchatMobile</string>
+    <string name="app_name">The Online Market Gardener</string>
+
+    <string name="hintUsername">Username</string>
+    <string name="hintPassword">Password</string>
+    <string name="newClient">New client ?</string>
+    <string name="connect">Log in</string>
+
+    <string name="articleName">Article name</string>
+    <string name="articlePrice">Price</string>
+    <string name="articleStock">Stock</string>
+    <string name="articleQuantity">Quantity</string>
+    <string name="txtPreviousArticle">Previous</string>
+    <string name="txtNextArticle">Next</string>
+    <string name="txtBuy">Buy</string>
+    <string name="txtTotalToPay">Total to pay</string>
+    <string name="txtDeleteArticle">Delete Article</string>
+    <string name="txtClearCart">Clear cart</string>
+    <string name="txtConfirmPurchase">Confirm Purchase</string>
+
+    <string name="itemDisconnectTxt">Disconnect</string>
+    <string name="itemLanguageTxt">Langue</string>
+
+    <string name="french">Français</string>
+    <string name="english">Anglais</string>
+
+    <string name="msgConfirmDisconnect">Are you sure you want to logout ?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+
+    <string name="alertMinOneArticle">Please choose at least 1 item!</string>
+    <string name="alertConfirmPurchase">Your order has been confirmed and added to the cart! You can now pay for your order on our payment application</string>
+
+    <string name="dbQuerryError">An error occurred while sending the request…Please try again!</string>
+    <string name="dbEmptyResultSetOnArticle">No article matching your request was found!</string>
+    <string name="dbEmptyResultSetOnConfirm">An error occurred while creating the invoice for your user account… Please try again!</string>
+    <string name="unknownErrorMsg">Unknown error…</string>
 </resources>

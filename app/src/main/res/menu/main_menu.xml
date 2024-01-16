@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/iconDeconnexion"
+        android:title="@string/itemDisconnectTxt"
+        android:icon="@drawable/deconnexion_icon"
+        app:showAsAction="always"/>
+
+    <item
+        android:id="@+id/iconLanguage"
+        android:title="@string/itemLanguageTxt"
+        android:icon="@drawable/langue"
+        app:showAsAction="always">
+
+        <menu>
+            <item
+                android:id="@+id/itemlanguageFr"
+                android:title="@string/french"
+                app:showAsAction="never"/>
+
+            <item
+                android:id="@+id/itemlanguageEn"
+                android:title="@string/english"
+                app:showAsAction="never"/>/>
+        </menu>
+    </item>
+</menu>

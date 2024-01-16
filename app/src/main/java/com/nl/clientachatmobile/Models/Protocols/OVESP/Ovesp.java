@@ -1,6 +1,7 @@
 package com.nl.clientachatmobile.Models.Protocols.OVESP;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -13,15 +14,21 @@ import com.nl.clientachatmobile.Models.Exceptions.AchatArticleException;
 import com.nl.clientachatmobile.Models.Exceptions.DataBaseException;
 import com.nl.clientachatmobile.Models.Protocols.Protocol;
 import com.nl.clientachatmobile.Models.Requests.BuyRequest;
+import com.nl.clientachatmobile.Models.Requests.CancelAllRequest;
 import com.nl.clientachatmobile.Models.Requests.CancelRequest;
+import com.nl.clientachatmobile.Models.Requests.ConfirmRequest;
 import com.nl.clientachatmobile.Models.Requests.ConsultRequest;
 import com.nl.clientachatmobile.Models.Requests.LoginRequest;
+import com.nl.clientachatmobile.Models.Requests.LogoutRequest;
 import com.nl.clientachatmobile.Models.Requests.Request;
 import com.nl.clientachatmobile.Models.Responses.BuyResponse;
+import com.nl.clientachatmobile.Models.Responses.CancelAllResponse;
 import com.nl.clientachatmobile.Models.Responses.CancelResponse;
+import com.nl.clientachatmobile.Models.Responses.ConfirmResponse;
 import com.nl.clientachatmobile.Models.Responses.ConsultResponse;
 import com.nl.clientachatmobile.Models.Responses.LoginResponse;
 import com.nl.clientachatmobile.Models.Responses.Response;
+import com.nl.clientachatmobile.R;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,6 +43,8 @@ public class Ovesp implements Protocol {
     private CurrentArticleManager currentArticleManager;
 
     private ShoppingCart shoppingCart;
+
+    private Context context;
 
 
     private Ovesp() {
@@ -55,8 +64,11 @@ public class Ovesp implements Protocol {
     public ShoppingCart getShoppingCart() { return shoppingCart; }
     public CurrentArticleManager getCurrentArticleManager() { return currentArticleManager; }
 
+    public String getUsername() { return loginUser; }
+
     @SuppressLint("StaticFieldLeak")
-    public boolean init(InputStream inputStream) {
+    public boolean init(InputStream inputStream, Context context) {
+        this.context = context;
         if(dataTransfer == null) {
             new AsyncTask<Void, Void, Void>() {
                 @Override
@@ -88,6 +100,15 @@ public class Ovesp implements Protocol {
         if(request instanceof CancelRequest) {
             return handleCancelRequest((CancelRequest) request);
         }
+        if(request instanceof CancelAllRequest) {
+            return handleCancelAllRequest();
+        }
+        if(request instanceof ConfirmRequest) {
+            return handleConfirmRequest((ConfirmRequest) request);
+        }
+        if(request instanceof LogoutRequest) {
+            handleLogoutRequest();
+        }
 
         return null;
     }
@@ -106,6 +127,7 @@ public class Ovesp implements Protocol {
 
         String[] responseElements = response.split("#");
         if(responseElements[1].equals("ok")) {
+            loginUser = loginRequest.getUsername();
             return new LoginResponse(true);
         }
         else {
@@ -124,21 +146,17 @@ public class Ovesp implements Protocol {
             int errCode = Integer.parseInt(responseElements[2]);
             String msgError;
             if(errCode == DataBaseException.QUERY_ERROR) {
-                msgError = "Une erreur est survenue lors de l'envoi de la requete...Veuillez reessayer!";
+                msgError = context.getResources().getString(R.string.dbQuerryError);
             }
             else if(errCode == DataBaseException.EMPTY_RESULT_SET) {
-                msgError = "Aucun article correspondant a votre demande n'a ete trouve!";
+                msgError = context.getResources().getString(R.string.dbEmptyResultSetOnArticle);
             }
             else {
-                msgError = "Erreur inconnue...";
+                msgError = context.getResources().getString(R.string.unknownErrorMsg);
             }
             throw new Exception(msgError);
         }
         else {
-            for(int i=0; i<responseElements.length; i++) {
-                Log.e("TEST", "Element [" + i + "] = " + responseElements[i]);
-            }
-
             int id = Integer.parseInt(responseElements[2]);
             String intitule = responseElements[3];
             int stock = Integer.parseInt(responseElements[4]);
@@ -161,11 +179,11 @@ public class Ovesp implements Protocol {
             int errCode = Integer.parseInt(responseElements[2]);
             switch(errCode) {
                 case DataBaseException.QUERY_ERROR:
-                    message = "Une erreur est survenue lors de l'envoi de la requete...Veuillez reessayer!";
+                    message = context.getResources().getString(R.string.dbQuerryError);
                     break;
 
                 case DataBaseException.EMPTY_RESULT_SET:
-                    message = "Aucun article correspondant a votre demande n'a ete trouve!";
+                    message = context.getResources().getString(R.string.dbEmptyResultSetOnArticle);
                     break;
 
                 case AchatArticleException.INSUFFICIENT_STOCK:
@@ -173,7 +191,7 @@ public class Ovesp implements Protocol {
                     break;
 
                 default:
-                    message = "Erreur inconnue...";
+                    message = context.getResources().getString(R.string.unknownErrorMsg);
             }
             throw new Exception(message);
         }
@@ -204,7 +222,67 @@ public class Ovesp implements Protocol {
             }
         }
         catch(IOException e) {
-            throw new Exception("Une erreur est survenue lors de l'envoi de la requête...");
+            throw new Exception(context.getResources().getString(R.string.dbQuerryError));
+        }
+    }
+
+    private CancelAllResponse handleCancelAllRequest() throws Exception {
+        String request = "CANCELALL";
+        try {
+            String response = dataTransfer.exchange(request);
+            Log.i("Ovesp DEBUG", "Reponse reçue: " + response);
+
+            String[] responseElements = response.split("#");
+            if(responseElements[1].equals("ok")) {
+                shoppingCart.clearCart();
+                return new CancelAllResponse(true);
+            }
+            else {
+                return new CancelAllResponse(false);
+            }
+        }
+        catch(Exception e) {
+            throw new Exception(context.getResources().getString(R.string.dbQuerryError));
+        }
+    }
+
+    private ConfirmResponse handleConfirmRequest(ConfirmRequest confirmRequest) throws Exception {
+        String request = "CONFIRM#" + confirmRequest.getLogin();
+        String reponse = dataTransfer.exchange(request);
+
+        String[] responseElements = reponse.split("#");
+
+        if (responseElements[1].equals("KO")) {
+            int errCode = Integer.parseInt(responseElements[2]);
+            String message;
+            switch(errCode) {
+                case DataBaseException.QUERY_ERROR:
+                    message = context.getResources().getString(R.string.dbQuerryError);
+                    break;
+
+                case DataBaseException.EMPTY_RESULT_SET:
+                    message = context.getResources().getString(R.string.dbEmptyResultSetOnConfirm);
+                    break;
+
+                default:
+                    message = context.getResources().getString(R.string.unknownErrorMsg);
+            }
+            throw new Exception(message);
+        }
+        shoppingCart.clearCart();
+
+        return new ConfirmResponse(true);
+    }
+
+    private void handleLogoutRequest() throws Exception {
+        String request = "LOGOUT";
+        try {
+            dataTransfer.exchange(request);
+            loginUser = "";
+            currentArticleManager.reinitialize();
+        }
+        catch (Exception e) {
+            throw new Exception(context.getResources().getString(R.string.dbQuerryError));
         }
     }
 }
